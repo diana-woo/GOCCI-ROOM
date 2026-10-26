@@ -162,7 +162,7 @@ export default function Home(){
  <div className="floor-decoration">✿</div>
  {furniture.map(i=><button key={i.id} aria-label={furnitureNames[i.kind]+" 드래그해서 이동"} className={"object "+(selected===i.id?"selected":"")} style={{left:i.x+"%",top:i.y+"%",zIndex:Math.round(i.y)+5}} onPointerDown={e=>startDrag(e,i.id)} onPointerMove={moveDrag} onPointerUp={finishDrag} onPointerCancel={()=>{dragging.current=null}} onClick={e=>e.stopPropagation()}><Art kind={i.kind}/></button>)}
  <Avatar style={{left:"48%",bottom:"25%"}}/><div className="music-note">♫</div>
- <Avatar friend style={{left:"67%",bottom:"21%",opacity:members.length===1?.5:1}}/>
+ <Avatar friend style={{left:"67%",bottom:"21%",opacity:members.length===1 ? 0.5 : 1}}/>
  </div>
  <div className="theme-panel ink-panel"><h2>⌂ <span>방 테마</span></h2><div className="theme-options">
  {([["pink","기본","#fffaf0"],["blue","하늘","#d7eff9"],["green","풀","#e5efd6"],["cream","밤","#d5d5e8"]] as const).map(([w,label,color])=><button key={w} className={"theme-card "+(wall===w?"active":"")} onClick={()=>wallpaper(w)}><div className="theme-preview" style={{background:color}}><span className="mini-wall"/><span className="mini-bed">▰</span><span className="mini-table">●</span></div><span>{label}</span></button>)}</div></div>

@@ -13,24 +13,102 @@ export function Art({kind}: {kind:FurnitureKind}){
  {kind==="bear"&&<g {...common}><circle cx="27" cy="26" r="12" fill="#d8b79c"/><circle cx="72" cy="26" r="12" fill="#d8b79c"/><ellipse cx="50" cy="67" rx="29" ry="27" fill="#d8b79c"/><circle cx="50" cy="39" r="29" fill="#e8c8aa"/><circle cx="40" cy="39" r="2.5"/><circle cx="60" cy="39" r="2.5"/><ellipse cx="50" cy="49" rx="5" ry="4" fill="#41312d"/></g>}
  </svg>
 }
-export function Avatar({friend=false,style}: {friend?:boolean;style?:CSSProperties}){
- const ink="#211d1b";
- return <div className={"avatar "+(friend?"friend":"")} style={style} aria-label={friend?"하치와레":"치이카와"} role="img">
- <svg viewBox="0 0 120 135" aria-hidden="true">
- <g stroke={ink} strokeWidth="3.1" strokeLinecap="round" strokeLinejoin="round">
- {/* Tiny feet and stubby arms */}
- <path d="M35 98Q29 105 31 116Q33 123 43 121L51 114Q61 119 70 115L80 122Q91 125 93 115Q94 107 87 98" fill="#fff"/>
- <path d="M28 92Q14 91 14 102Q14 109 29 108M92 92Q106 91 106 102Q106 109 91 108" fill="#fff"/>
- {friend?<><path d="M20 52Q12 28 18 10Q20 5 26 11L45 31M76 31L96 10Q102 5 105 11Q112 29 101 52" fill="#fff"/><path d="m22 35 1-15 12 13m51 0 12-13 1 15" fill="#f6c6d0" strokeWidth="1.8"/></>:<><path d="M24 51Q9 43 15 29Q20 18 32 21Q43 24 45 38M75 38Q79 24 91 21Q103 18 108 29Q114 43 99 51" fill="#fff"/><path d="M23 40Q17 33 23 28Q31 23 37 35M83 35Q89 23 97 28Q103 33 97 40" fill="#f9cbd3" strokeWidth="1.8"/></>}
- {/* Main head, near-round and slightly squashed, like the provided reference */}
- <path d="M9 70Q9 41 32 34Q58 25 83 33Q110 39 111 69Q113 96 93 106Q76 115 58 113Q35 115 20 103Q8 92 9 70Z" fill="#fff"/>
- {friend&&<path d="M12 59Q17 39 37 34Q51 29 60 32Q74 28 87 35Q104 40 108 59Q92 57 84 46Q81 42 79 42Q74 57 61 59Q49 57 41 43Q30 56 12 59Z" fill="#a6d8ef" stroke="none"/>}
- <ellipse cx="43" cy="74" rx="2.9" ry="3.5" fill={ink} stroke="none"/>
- <ellipse cx="78" cy="74" rx="2.9" ry="3.5" fill={ink} stroke="none"/>
- <ellipse cx="28" cy="84" rx="8.2" ry="5.3" fill="#f4a4b7" stroke="none" opacity=".85"/>
- <ellipse cx="93" cy="84" rx="8.2" ry="5.3" fill="#f4a4b7" stroke="none" opacity=".85"/>
- <path d="M57 81Q60 84 63 81" fill="none" strokeWidth="2.2"/>
- <path d="M54 87Q60 95 66 87" fill="none" strokeWidth="2.2"/>
- </g>
- </svg></div>
+export const characterKinds = ["chiikawa", "hachiware", "usagi"] as const;
+export type CharacterKind = (typeof characterKinds)[number];
+export const characterNames: Record<CharacterKind, string> = {
+  chiikawa: "치이카와",
+  hachiware: "하치와레",
+  usagi: "우사기",
+};
+export const moods = ["happy", "shy", "surprised", "sleepy"] as const;
+export type Mood = (typeof moods)[number];
+export const moodNames: Record<Mood, string> = {
+  happy: "방긋",
+  shy: "수줍",
+  surprised: "깜짝",
+  sleepy: "꾸벅",
+};
+
+export function isCharacter(value: unknown): value is CharacterKind {
+  return typeof value === "string" && characterKinds.some((kind) => kind === value);
+}
+export function isMood(value: unknown): value is Mood {
+  return typeof value === "string" && moods.some((mood) => mood === value);
+}
+
+/** Original hand-drawn SVG illustrations. No external character images are loaded. */
+export function Avatar({
+  friend = false,
+  kind,
+  mood = "happy",
+  style,
+}: {
+  friend?: boolean;
+  kind?: CharacterKind;
+  mood?: Mood;
+  style?: CSSProperties;
+}) {
+  const who = kind ?? (friend ? "hachiware" : "chiikawa");
+  const yellow = who === "usagi";
+  const blue = who === "hachiware";
+  const ink = "#282321";
+  const fur = yellow ? "#fff1ad" : "#fffefb";
+  const eyeY = mood === "sleepy" ? 84 : 82;
+  return (
+    <div className={"avatar " + (friend ? "friend" : "")} style={style} role="img"
+      aria-label={characterNames[who] + " " + moodNames[mood]}>
+      <svg viewBox="0 0 140 144" aria-hidden="true">
+        <g stroke={ink} strokeWidth="3.1" strokeLinecap="round" strokeLinejoin="round">
+          {/* Silly tiny paws, tucked behind an oversized round head */}
+          <path d="M30 95Q12 91 13 107Q16 119 36 109M108 96Q126 92 128 107Q127 119 105 109" fill={fur}/>
+          <path d="M36 107Q27 116 33 127Q38 134 48 128L57 119Q70 124 81 119L90 130Q101 134 106 125Q110 114 100 107" fill={fur}/>
+          {yellow ? (
+            <>
+              <path d="M36 46Q22 12 33 7Q43 0 54 40M89 39Q98 0 111 7Q122 13 105 48" fill={fur}/>
+              <path d="M36 35Q30 16 37 15Q43 15 47 37M97 37Q105 13 111 16Q114 19 105 38" fill="#f7bbbc" strokeWidth="1.5"/>
+            </>
+          ) : blue ? (
+            <>
+              <path d="M25 52 17 12Q16 6 23 11L49 34M91 34 117 11Q123 6 123 13L116 53" fill={fur}/>
+              <path d="m25 40-3-19 16 17m66 0 14-17-3 19" fill="#f7bbc8" strokeWidth="1.7"/>
+            </>
+          ) : (
+            <>
+              <path d="M27 50Q12 40 17 26Q22 14 36 20Q47 25 49 37M91 37Q93 25 105 20Q120 14 125 27Q130 40 115 50" fill={fur}/>
+              <path d="M26 38Q20 31 26 27Q34 23 42 36M98 36Q105 23 114 27Q119 32 114 39" fill="#f8c8cf" strokeWidth="1.6"/>
+            </>
+          )}
+          {/* One imperfect rounded face: the head is nearly the entire body */}
+          <path d="M12 79Q9 47 36 36Q64 27 91 35Q121 42 126 73Q130 104 105 116Q87 125 69 123Q47 125 28 115Q12 106 12 79Z" fill={fur}/>
+          {blue && (
+            <path d="M15 68Q17 47 38 38Q51 32 69 34Q87 31 103 39Q120 48 123 69Q109 67 96 56Q91 51 87 45Q84 59 72 64Q65 67 60 63Q48 57 46 45Q34 63 15 68Z"
+              fill="#a8d8ef" stroke="none"/>
+          )}
+          {/* Side cheeks, tiny dot eyes and intentionally simple mouth */}
+          <ellipse cx="34" cy="94" rx="9" ry="6" fill="#f4a7b5" opacity=".88" stroke="none"/>
+          <ellipse cx="106" cy="94" rx="9" ry="6" fill="#f4a7b5" opacity=".88" stroke="none"/>
+          {mood === "sleepy" ? (
+            <>
+              <path d="M46 83q6 5 12 0M83 83q6 5 12 0" fill="none" strokeWidth="2.6"/>
+              <path d="M66 100q5 4 10 0" fill="none" strokeWidth="2"/>
+            </>
+          ) : (
+            <>
+              <ellipse cx="51" cy={eyeY} rx="3.2" ry="3.8" fill={ink} stroke="none"/>
+              <ellipse cx="89" cy={eyeY} rx="3.2" ry="3.8" fill={ink} stroke="none"/>
+              {mood === "surprised" ? (
+                <ellipse cx="70" cy="98" rx="5" ry="6" fill="#d46e7c" strokeWidth="2.2"/>
+              ) : mood === "shy" ? (
+                <path d="M65 96q5 3 10 0M43 76l5-2m44 2-5-2" fill="none" strokeWidth="2.2"/>
+              ) : (
+                <path d="M65 93q5 4 10 0M63 99q7 9 14 0" fill="none" strokeWidth="2.2"/>
+              )}
+            </>
+          )}
+          {yellow && <path d="M54 70q-4-4-8 0M94 70q-4-4-8 0" strokeWidth="1.8" fill="none"/>}
+          <path d="M51 120q4 6 8 7M87 121q-4 6-8 7" strokeWidth="1.8" fill="none"/>
+        </g>
+      </svg>
+    </div>
+  );
 }

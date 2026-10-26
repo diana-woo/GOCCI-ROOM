@@ -36,7 +36,9 @@ export function isMood(value: unknown): value is Mood {
   return typeof value === "string" && moods.some((mood) => mood === value);
 }
 
-/** Original hand-drawn SVG illustrations. No external character images are loaded. */
+/** Single-silhouette hand-drawn vectors modeled against the user's character reference.
+ * SVG shapes are authored in code; no external character images are used.
+ */
 export function Avatar({
   friend = false,
   kind,
@@ -48,65 +50,78 @@ export function Avatar({
   mood?: Mood;
   style?: CSSProperties;
 }) {
-  const who = kind ?? (friend ? "hachiware" : "chiikawa");
-  const yellow = who === "usagi";
-  const blue = who === "hachiware";
-  const ink = "#282321";
-  const fur = yellow ? "#fff1ad" : "#fffefb";
-  const eyeY = mood === "sleepy" ? 84 : 82;
+  const who: CharacterKind = kind ?? (friend ? "hachiware" : "chiikawa");
+  const ink = "#211e1c";
+  const white = "#fffefa";
+  const isSleepy = mood === "sleepy";
+
   return (
-    <div className={"avatar " + (friend ? "friend" : "")} style={style} role="img"
-      aria-label={characterNames[who] + " " + moodNames[mood]}>
-      <svg viewBox="0 0 140 144" aria-hidden="true">
-        <g stroke={ink} strokeWidth="3.1" strokeLinecap="round" strokeLinejoin="round">
-          {/* Silly tiny paws, tucked behind an oversized round head */}
-          <path d="M30 95Q12 91 13 107Q16 119 36 109M108 96Q126 92 128 107Q127 119 105 109" fill={fur}/>
-          <path d="M36 107Q27 116 33 127Q38 134 48 128L57 119Q70 124 81 119L90 130Q101 134 106 125Q110 114 100 107" fill={fur}/>
-          {yellow ? (
+    <div
+      className={"avatar " + (friend ? "friend" : "")}
+      style={style}
+      role="img"
+      aria-label={characterNames[who] + " · " + moodNames[mood]}
+    >
+      <svg viewBox="0 0 140 144" aria-hidden="true" focusable="false">
+        <g stroke={ink} strokeWidth="3.7" strokeLinecap="round" strokeLinejoin="round">
+          {who === "chiikawa" && (
+            <path
+              d="M46 22C40 17 39 12 33 14C25 16 27 26 30 31C18 39 12 51 11 67C9 85 15 100 27 106C20 108 18 113 22 118C26 122 33 123 38 120C39 126 42 134 48 135C53 136 56 133 57 129L79 129C80 135 87 136 92 133C96 130 97 125 98 120C105 124 113 120 112 114C112 110 108 107 104 106C117 98 122 83 119 66C117 52 110 39 98 32C102 24 101 17 94 15C88 13 82 18 80 23C68 20 57 19 46 22Z"
+              fill={white}
+            />
+          )}
+          {who === "hachiware" && (
             <>
-              <path d="M36 46Q22 12 33 7Q43 0 54 40M89 39Q98 0 111 7Q122 13 105 48" fill={fur}/>
-              <path d="M36 35Q30 16 37 15Q43 15 47 37M97 37Q105 13 111 16Q114 19 105 38" fill="#f7bbbc" strokeWidth="1.5"/>
+              <path
+                d="M25 46C23 35 24 17 32 15C39 12 46 20 49 27C60 24 71 25 80 28C87 19 96 12 102 16C109 21 109 37 106 47C118 59 121 72 118 87C115 97 109 103 105 106C112 109 113 114 110 118C107 123 101 123 97 120C96 130 94 135 87 135C82 135 78 132 78 129L56 129C54 134 49 136 44 133C40 131 38 125 38 120C33 123 26 121 23 117C20 113 23 109 27 106C15 101 10 86 11 72C12 58 17 52 25 46Z"
+                fill={white}
+              />
+              <path
+                d="M25 50C25 35 25 20 33 17C39 15 46 23 50 28C62 25 70 26 80 28C87 22 95 15 101 18C107 22 105 38 106 50C98 54 89 57 80 53C73 50 69 46 65 43C61 49 54 54 46 55C36 57 29 54 25 50Z"
+                fill="#a6cee8"
+              />
             </>
-          ) : blue ? (
+          )}
+          {who === "usagi" && (
             <>
-              <path d="M25 52 17 12Q16 6 23 11L49 34M91 34 117 11Q123 6 123 13L116 53" fill={fur}/>
-              <path d="m25 40-3-19 16 17m66 0 14-17-3 19" fill="#f7bbc8" strokeWidth="1.7"/>
+              <path
+                d="M40 44C35 34 30 13 35 7C38 3 43 4 47 8C54 17 55 33 55 41L74 41C75 30 77 11 83 6C87 3 93 4 96 8C102 17 95 36 90 45C106 52 117 64 118 79C120 91 116 101 105 108C111 109 113 114 109 118C106 122 100 122 96 120C95 130 93 135 87 135C82 135 79 133 78 129L57 129C56 134 52 136 47 134C41 131 40 126 39 121C33 123 26 120 23 116C20 112 22 109 27 106C14 98 10 85 13 71C16 57 26 48 40 44Z"
+                fill="#fff4b2"
+              />
+              <path
+                d="M43 34C40 27 36 13 40 12C45 12 49 30 49 36M82 35C84 22 88 11 91 12C95 15 90 29 87 36"
+                strokeWidth="2"
+                fill="none"
+              />
+            </>
+          )}
+          {isSleepy ? (
+            <>
+              <path d="M48 82q5 4 10 0M76 82q5 4 10 0" fill="none" strokeWidth="2.5" />
+              <path d="M64 94q3-2 6 0" fill="none" strokeWidth="2.2" />
             </>
           ) : (
             <>
-              <path d="M27 50Q12 40 17 26Q22 14 36 20Q47 25 49 37M91 37Q93 25 105 20Q120 14 125 27Q130 40 115 50" fill={fur}/>
-              <path d="M26 38Q20 31 26 27Q34 23 42 36M98 36Q105 23 114 27Q119 32 114 39" fill="#f8c8cf" strokeWidth="1.6"/>
+              <path d="M50 70q3-2 6 0M78 70q3-2 6 0" fill="none" strokeWidth="2" />
+              <ellipse cx="53" cy="82" rx="2.8" ry="3.3" stroke="none" fill={ink} />
+              <ellipse cx="81" cy="82" rx="2.8" ry="3.3" stroke="none" fill={ink} />
             </>
           )}
-          {/* One imperfect rounded face: the head is nearly the entire body */}
-          <path d="M12 79Q9 47 36 36Q64 27 91 35Q121 42 126 73Q130 104 105 116Q87 125 69 123Q47 125 28 115Q12 106 12 79Z" fill={fur}/>
-          {blue && (
-            <path d="M15 68Q17 47 38 38Q51 32 69 34Q87 31 103 39Q120 48 123 69Q109 67 96 56Q91 51 87 45Q84 59 72 64Q65 67 60 63Q48 57 46 45Q34 63 15 68Z"
-              fill="#a8d8ef" stroke="none"/>
-          )}
-          {/* Side cheeks, tiny dot eyes and intentionally simple mouth */}
-          <ellipse cx="34" cy="94" rx="9" ry="6" fill="#f4a7b5" opacity=".88" stroke="none"/>
-          <ellipse cx="106" cy="94" rx="9" ry="6" fill="#f4a7b5" opacity=".88" stroke="none"/>
-          {mood === "sleepy" ? (
+          <ellipse cx="33" cy="91" rx="7.5" ry="5.5" fill="#f1b1c0" stroke="none" />
+          <ellipse cx="101" cy="91" rx="7.5" ry="5.5" fill="#f1b1c0" stroke="none" />
+          <path d="M30 88v3m4-3v3m64-3v3m4-3v3" strokeWidth="1.7" fill="none" />
+          {mood === "happy" ? (
             <>
-              <path d="M46 83q6 5 12 0M83 83q6 5 12 0" fill="none" strokeWidth="2.6"/>
-              <path d="M66 100q5 4 10 0" fill="none" strokeWidth="2"/>
+              <path d="M62 89q5 4 10 0q0 10-5 10q-5 0-5-10Z" fill={ink} strokeWidth="2" />
+              <path d="M65 96q2-2 4 0" fill="none" stroke="#f1b1c0" strokeWidth="2" />
             </>
+          ) : mood === "shy" ? (
+            <path d="M62 92q5 5 10 0" fill="none" strokeWidth="2.5" />
+          ) : mood === "surprised" ? (
+            <ellipse cx="67" cy="94" rx="4.3" ry="5.8" fill="#e896a6" strokeWidth="2.5" />
           ) : (
-            <>
-              <ellipse cx="51" cy={eyeY} rx="3.2" ry="3.8" fill={ink} stroke="none"/>
-              <ellipse cx="89" cy={eyeY} rx="3.2" ry="3.8" fill={ink} stroke="none"/>
-              {mood === "surprised" ? (
-                <ellipse cx="70" cy="98" rx="5" ry="6" fill="#d46e7c" strokeWidth="2.2"/>
-              ) : mood === "shy" ? (
-                <path d="M65 96q5 3 10 0M43 76l5-2m44 2-5-2" fill="none" strokeWidth="2.2"/>
-              ) : (
-                <path d="M65 93q5 4 10 0M63 99q7 9 14 0" fill="none" strokeWidth="2.2"/>
-              )}
-            </>
+            <path d="M64 95q3 3 6 0" fill="none" strokeWidth="2" />
           )}
-          {yellow && <path d="M54 70q-4-4-8 0M94 70q-4-4-8 0" strokeWidth="1.8" fill="none"/>}
-          <path d="M51 120q4 6 8 7M87 121q-4 6-8 7" strokeWidth="1.8" fill="none"/>
         </g>
       </svg>
     </div>

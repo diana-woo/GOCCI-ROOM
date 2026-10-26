@@ -6,7 +6,7 @@ import {Art,Avatar,furnitureNames,type Furniture,type FurnitureKind} from "./roo
 type Wall="pink"|"blue"|"green"|"cream";
 type Chat={id:number;user_id:string;body:string};
 type Member={user_id:string;nickname:string};
-const starter:Furniture[]=[{id:"bed",kind:"bed",x:28,y:50},{id:"plant",kind:"plant",x:73,y:45}];
+const starter:Furniture[]=[{id:"bed",kind:"bed",x:27,y:63},{id:"plant",kind:"plant",x:77,y:56},{id:"table",kind:"table",x:60,y:73},{id:"lamp",kind:"lamp",x:32,y:48}];
 const kinds=Object.keys(furnitureNames) as FurnitureKind[];
 export default function Home(){
  const supabase=getSupabase();
@@ -22,6 +22,9 @@ export default function Home(){
  const [error,setError]=useState("");
  const [busy,setBusy]=useState(false);
  const [ready,setReady]=useState(false);
+ const [tab,setTab]=useState<"furniture"|"wall"|"props">("furniture");
+ const [customTab,setCustomTab]=useState<"look"|"accessory"|"speech"|"mood">("look");
+ const [section,setSection]=useState<"room"|"decorate"|"shop"|"settings">("room");
  const seq=useRef(0);
  const roomRef=useRef<HTMLDivElement>(null);
  const dragging=useRef<{id:string;pointerId:number;startX:number;startY:number;moved:boolean}|null>(null);
@@ -138,10 +141,37 @@ export default function Home(){
  }
  const link=typeof window!=="undefined"&&roomId?window.location.origin+"?room="+roomId:"";
  const copy=async()=>{if(link)await navigator.clipboard.writeText(link);else if(!supabase)alert("실제 초대 링크는 Supabase 연결 후 만들 수 있어요.")};
- return <main className="shell"><header className="header"><div><div className="eyebrow">TINY PLACE, BIG FEELINGS</div><div className="brand">GOCCI ROOM ♡</div></div><button className="pill" onClick={copy} disabled={!roomId}>초대 링크 복사 ↗</button></header><p className="subtitle">우리 둘만의 작고 말랑한 공간. 소품을 손가락으로 꾹 잡고 자유롭게 옮겨보세요.</p>
+ return <main className="chii-app">
+ <div className="chii-layout">
+ <nav className="left-rail" aria-label="메뉴"><div className="logo">CHII ROOM</div><p className="rail-caption">작고 소중한<br/>우리만의 공간</p>
+ {([["room","⌂","내 방"],["decorate","♧","꾸미기"],["shop","♧","상점"],["settings","⚙","설정"]] as const).map(([id,ico,label])=><button key={id} className={"nav-choice "+(section===id?"active":"")} onClick={()=>setSection(id)}><span>{ico}</span>{label}</button>)}
+ <button className="invite-link" onClick={copy} disabled={!roomId}>♡ 초대 링크</button></nav>
+ <section className="center-column">
  {error&&<div className="alert" role="alert">{error} <button onClick={()=>setError("")}>닫기</button></div>}
- {demo?<div className="alert">미리보기 모드 · Supabase 환경변수를 연결하면 실제 2인 방과 실시간 채팅을 사용할 수 있어요.</div>:!roomId&&<div className="setup"><input className="nickname" maxLength={20} value={nickname} onChange={e=>setNickname(e.target.value)} aria-label="닉네임" placeholder="닉네임"/><button className="pill" disabled={!ready||busy||!uid} onClick={()=>void createRoom()}>새 방 만들기</button><span className="status">{!ready?"연결 중…":"방을 만들면 친구에게 링크를 보낼 수 있어요."}</span></div>}
- {roomId&&<p className="status">함께 있는 사람 {members.length}/2 · {members.map(m=>m.nickname).join(" · ")} · 방장만 꾸미기를 변경할 수 있어요.</p>}
- <div className="columns"><section className="panel"><h2>⌂ 우리의 작은 방</h2><div className={"room "+wall} ref={roomRef} onClick={place} aria-label="방 꾸미기 공간"><div className="floor"/><div className="rug"/><div className="window"><span>☁</span></div><div className="room-sparkle sparkle-one">✳</div><div className="room-sparkle sparkle-two">✦</div>{furniture.map(i=><button key={i.id} aria-label={furnitureNames[i.kind]+" 드래그하여 이동"} className={"object "+(selected===i.id?"selected":"")} style={{left:i.x+"%",top:i.y+"%",zIndex:Math.round(i.y)+5}} onPointerDown={e=>startDrag(e,i.id)} onPointerMove={moveDrag} onPointerUp={finishDrag} onPointerCancel={()=>{dragging.current=null}} onClick={e=>e.stopPropagation()}><Art kind={i.kind}/></button>)}<Avatar/><div className="name-tag" style={{left:"30%",top:"65%"}}>나</div><Avatar friend/><div className="name-tag" style={{left:"64%",top:"57%"}}>친구</div></div><div className="palette"><b>벽지</b>{([["pink","#fbe6e8"],["blue","#e1edf9"],["green","#e6efdf"],["cream","#fff1d5"]] as const).map(([w,c])=><button key={w} aria-label={w+" 벽지"} aria-pressed={wall===w} style={{background:c,outline:wall===w?"2px solid #e995ab":undefined}} onClick={()=>wallpaper(w)}/>)}<button className="tool" onClick={remove} disabled={!selected}>선택 가구 삭제</button></div></section>
- <aside className="stack"><section className="panel"><h2>✎ 가구 꾸미기</h2><div className="furniture-grid">{kinds.map(kind=><button key={kind} className="furn-btn" onClick={()=>add(kind)}><Art kind={kind}/><span>{furnitureNames[kind]}</span></button>)}</div></section><section className="panel"><h2>♡ 채팅 {demo&&<small>(미리보기)</small>}</h2><div className="chat-log" aria-live="polite">{messages.length===0&&<p className="status">첫 인사를 건네보세요 ♡</p>}{messages.map(m=><p key={m.id} className={"chat-line "+(m.user_id!==uid?"friend":"")}>{m.user_id===uid?"나":members.find(p=>p.user_id===m.user_id)?.nickname||"친구"}: {m.body}</p>)}</div><form className="chat-form" onSubmit={send}><input value={draft} maxLength={500} onChange={e=>setDraft(e.target.value)} placeholder="메시지를 입력하세요" aria-label="메시지"/><button disabled={!!supabase&&!roomId}>보내기</button></form></section></aside></div><p className="footer">GOCCI ROOM · 둘만의 작은 세계</p></main>;
+ {!supabase&&<div className="demo-note">디자인 미리보기 · 친구와 함께 쓰려면 Supabase 연결이 필요해요.</div>}
+ {supabase&&!roomId&&<div className="setup"><input className="nickname" maxLength={20} value={nickname} onChange={e=>setNickname(e.target.value)} aria-label="닉네임" placeholder="닉네임"/><button className="pill" disabled={!ready||busy||!uid} onClick={()=>void createRoom()}>우리 방 만들기</button></div>}
+ <div className={"room "+wall} ref={roomRef} onClick={place} aria-label="가구를 드래그해서 옮길 수 있는 방">
+ <svg className="room-architecture" viewBox="0 0 850 690" preserveAspectRatio="none" aria-hidden="true"><g stroke="#242220" strokeWidth="3.5" strokeLinejoin="round" strokeLinecap="round">
+ <path className="wall-left" d="M25 235 430 16 430 245 25 487Z"/><path className="wall-right" d="M430 16 823 227 823 485 430 245Z"/>
+ <path className="room-floor" d="M25 487 430 245 823 485 430 676Z"/>
+ <path fill="none" d="M25 235 430 16 823 227M25 235V487L430 676 823 485V227M430 16V245"/>
+ <path fill="#d9eef8" d="m548 146 124 67v119l-124-61Z"/><path fill="#fff" strokeWidth="2.4" d="m548 146 124 67v119l-124-61Z"/><path fill="#d7edf8" strokeWidth="2.4" d="m559 160 103 56v99l-103-51Z"/><path fill="#b4d4b3" strokeWidth="1.8" d="M559 251q29-34 47-12 22-43 56-7v83l-103-51Z"/><path fill="none" strokeWidth="2.6" d="m548 146 124 67v119l-124-61ZM559 160l103 56v99l-103-51Z"/>
+ <path fill="#fffdf7" d="M716 396v-75q1-49 43-47 39 4 39 50v117Z"/><circle cx="748" cy="367" r="3" fill="#242220" stroke="none"/>
+ <path fill="#fffdf7" d="m139 294 72-40v83l-72 40Z"/><path fill="none" d="m139 294 72-40v83l-72 40ZM148 285l53-29"/>
+ </g><g fill="#242220"><circle cx="171" cy="327" r="3"/><circle cx="182" cy="327" r="3"/></g><path d="M172 339q6 7 12 0" stroke="#242220" strokeWidth="2" fill="none"/></svg>
+ <div className="floor-decoration">✿</div>
+ {furniture.map(i=><button key={i.id} aria-label={furnitureNames[i.kind]+" 드래그해서 이동"} className={"object "+(selected===i.id?"selected":"")} style={{left:i.x+"%",top:i.y+"%",zIndex:Math.round(i.y)+5}} onPointerDown={e=>startDrag(e,i.id)} onPointerMove={moveDrag} onPointerUp={finishDrag} onPointerCancel={()=>{dragging.current=null}} onClick={e=>e.stopPropagation()}><Art kind={i.kind}/></button>)}
+ <Avatar style={{left:"48%",bottom:"25%"}}/><div className="music-note">♫</div>
+ <Avatar friend style={{left:"67%",bottom:"21%",opacity:members.length===1?.5:1}}/>
+ </div>
+ <div className="theme-panel ink-panel"><h2>⌂ <span>방 테마</span></h2><div className="theme-options">
+ {([["pink","기본","#fffaf0"],["blue","하늘","#d7eff9"],["green","풀","#e5efd6"],["cream","밤","#d5d5e8"]] as const).map(([w,label,color])=><button key={w} className={"theme-card "+(wall===w?"active":"")} onClick={()=>wallpaper(w)}><div className="theme-preview" style={{background:color}}><span className="mini-wall"/><span className="mini-bed">▰</span><span className="mini-table">●</span></div><span>{label}</span></button>)}</div></div>
+ </section>
+ <aside className="right-column">
+ <section className="ink-panel catalog"><div className="tabbar">{([["furniture","🛋","가구"],["wall","▧","벽지"],["props","♧","소품"]] as const).map(([id,ico,label])=><button key={id} className={tab===id?"active":""} onClick={()=>setTab(id)}><span>{ico}</span>{label}</button>)}</div>
+ {tab==="furniture"||tab==="props"?<div className="catalog-grid">{(tab==="props"?kinds.filter(k=>["plant","lamp","bear"].includes(k)):kinds).map(kind=><button key={kind} className="catalog-item" onClick={()=>add(kind)}><Art kind={kind}/></button>)}</div>:<div className="catalog-grid">{(["pink","blue","green","cream"] as const).map((w,i)=><button key={w} className="catalog-item wallpaper-item" onClick={()=>wallpaper(w)} style={{background:["#fff5ef","#d7eff9","#e5efd6","#d5d5e8"][i]}}>{["기본","하늘","풀","밤"][i]}</button>)}</div>}
+ <div className="catalog-hint">소품을 추가하고 방 안에서 드래그해 이동해요. <button onClick={remove} disabled={!selected}>선택 삭제</button></div></section>
+ <section className="ink-panel customize"><h2>♧ 캐릭터 꾸미기</h2><div className="custom-tabs">{([["look","외형"],["accessory","액세서리"],["speech","말풍선"],["mood","감정표현"]] as const).map(([id,label])=><button key={id} className={customTab===id?"active":""} onClick={()=>setCustomTab(id)}>{label}</button>)}</div><div className="character-row"><div><Avatar/><span>치이카와</span></div><div><Avatar friend/><span>하치와레</span></div><div className="coming-soon">{customTab==="look"?"캐릭터 선택":customTab==="accessory"?"액세서리 준비 중":customTab==="speech"?"말풍선 준비 중":"표정 준비 중"}</div></div></section>
+ <section className="ink-panel chat-panel"><h2>▤ 채팅 <small>{roomId?members.length+"/2":"미리보기"}</small></h2><div className="chat-log" aria-live="polite">{messages.length===0?<><div className="bubble-line"><span className="bubble-face">◕</span><span className="bubble">뭐 해?</span></div><div className="bubble-line mine"><span className="bubble">놀자...!</span><span className="bubble-face blue">◕</span></div><div className="bubble-line"><span className="bubble-face">◕</span><span className="bubble">같이 놀자!</span></div></>:messages.map(m=><div key={m.id} className={"bubble-line "+(m.user_id===uid?"mine":"")}><span className="bubble">{m.body}</span></div>)}</div><form className="chat-form" onSubmit={send}><input value={draft} maxLength={500} onChange={e=>setDraft(e.target.value)} placeholder="메시지를 입력하세요..." aria-label="메시지"/><button disabled={!!supabase&&!roomId} aria-label="전송">➤</button></form></section>
+ </aside></div></main>;
 }

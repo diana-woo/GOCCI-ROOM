@@ -14,5 +14,22 @@ export function Art({kind}: {kind:FurnitureKind}){
  </svg>
 }
 export function Avatar({friend=false,style}: {friend?:boolean;style?:CSSProperties}){
- return <div className={"avatar "+(friend?"friend":"")} style={style}><svg viewBox="0 0 100 100" aria-hidden="true"><g stroke="#34302e" strokeWidth="3.8" strokeLinecap="round" strokeLinejoin="round"><path d={friend?"M24 35Q5 12 21 8q17-2 23 19M60 27Q75 2 88 11q11 14-13 28":"M24 34Q9 8 23 8q17-3 20 19M58 27Q74 5 86 12q10 14-12 29"} fill={friend?"#e6c9a9":"#fff"}/><path d="M12 58Q11 24 48 24q40-3 41 34 1 31-39 32Q12 91 12 58Z" fill={friend?"#e7cba8":"#fff"}/><path d="M39 55v3m23-3v3" fill="none"/><path d="M48 67q4 5 8 0" fill="none"/><ellipse cx="27" cy="64" rx="7" ry="4" fill="#f5bac4" stroke="none"/><ellipse cx="74" cy="64" rx="7" ry="4" fill="#f5bac4" stroke="none"/></g></svg></div>
+ const outline={stroke:"#302b2c",strokeWidth:3.1,strokeLinejoin:"round" as const,strokeLinecap:"round" as const};
+ return <div className={"avatar "+(friend?"friend":"")} style={style} aria-label={friend?"하치와레 캐릭터":"치이카와 캐릭터"} role="img">
+ <svg viewBox="0 0 120 130" aria-hidden="true">
+  <g {...outline}>
+   {/* Rounded little body and short feet */}
+   <path d="M36 94Q22 108 32 119Q44 124 50 113L70 113Q79 126 90 118Q101 109 85 94" fill="#fff"/>
+   <path d="M26 92Q9 97 13 108Q17 116 31 104M94 91Q111 95 107 106Q103 114 92 105" fill="#fff"/>
+   {friend?<><path d="M21 52Q6 23 18 8Q31 0 43 26M77 27Q91 0 104 9Q114 24 99 54" fill="#fff"/><path d="M23 42Q12 20 21 16Q29 12 38 32M82 33Q94 13 101 18Q105 25 96 43" fill="#f4bfd0"/></>:<><path d="M23 49Q9 19 21 11Q36 4 44 32M76 32Q88 5 102 11Q112 21 98 49" fill="#fff"/><path d="M26 38Q18 22 23 20Q30 17 37 35M83 35Q94 16 100 21Q104 27 95 40" fill="#f6c5d0"/></>}
+   <path d="M10 67Q8 30 56 28Q111 26 111 70Q112 106 62 109Q12 110 10 67Z" fill="#fff"/>
+   {friend&&<path d="M13 54Q17 29 40 30Q50 34 59 47Q68 33 84 29Q107 35 109 54L96 53Q87 45 77 52Q68 61 60 66Q50 58 41 52Q30 45 22 55Z" fill="#9ecbe3" stroke="none"/>}
+   <ellipse cx="42" cy="70" rx="3.4" ry="4.4" fill="#292529" stroke="none"/>
+   <ellipse cx="79" cy="70" rx="3.4" ry="4.4" fill="#292529" stroke="none"/>
+   <path d="M57 79Q60 82 63 79M55 85Q60 91 65 85" fill="none" strokeWidth="2.5"/>
+   <ellipse cx="27" cy="83" rx="10" ry="6" fill="#f9b8c5" stroke="none" opacity=".88"/>
+   <ellipse cx="94" cy="83" rx="10" ry="6" fill="#f9b8c5" stroke="none" opacity=".88"/>
+   {friend&&<path d="M56 90q4 5 8 0" strokeWidth="2" fill="none"/>}
+  </g>
+ </svg></div>
 }

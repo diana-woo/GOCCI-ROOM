@@ -92,14 +92,25 @@ export default function Home(){
    if(!supabase||!uid)return;
    setBusy(true);setError("");
    const {error:err}=await supabase.rpc("join_room",{p_room:id,p_nickname:nickname.trim()||"친구"});
-   if(err)setError(err.message);else{setRoomId(id);window.history.replaceState(null,"","?room="+id)}
+   if(err)setError(err.message);else{
+     const {error:profileError}=await supabase.from("room_members")
+       .update({character:chosenKind,mood:chosenMood}).eq("room_id",id).eq("user_id",uid);
+     if(profileError)setError("프로필 동기화 실패: "+profileError.message);
+     setRoomId(id);window.history.replaceState(null,"","?room="+id);
+   }
    setBusy(false);
  }
  async function createRoom(){
    if(!supabase||!uid)return;
    setBusy(true);setError("");
    const {data,error:err}=await supabase.rpc("create_room",{p_nickname:nickname.trim()||"나"});
-   if(err)setError(err.message);else if(data){setRoomId(data as string);window.history.replaceState(null,"","?room="+data)}
+   if(err)setError(err.message);else if(data){
+     const newId=data as string;
+     const {error:profileError}=await supabase.from("room_members")
+       .update({character:chosenKind,mood:chosenMood}).eq("room_id",newId).eq("user_id",uid);
+     if(profileError)setError("프로필 동기화 실패: "+profileError.message);
+     setRoomId(newId);window.history.replaceState(null,"","?room="+newId);
+   }
    setBusy(false);
  }
  async function persist(nextWall:Wall,nextFurniture:Furniture[]){
@@ -186,8 +197,8 @@ export default function Home(){
  const other=members.find(m=>m.user_id!==uid);
  const friendKind=isCharacter(other?.character)?other.character:previewFriend;
  const friendMood=isMood(other?.mood)?other.mood:"happy";
- const ownBubble=[...messages].reverse().find(m=>m.user_id===ownUserId)?.body||"같이 놀자!";
- const friendBubble=[...messages].reverse().find(m=>m.user_id!==ownUserId)?.body||"뭐 해?";
+ const ownBubble=[...messages].reverse().find(m=>m.user_id===ownUserId)?.body || (demo?"같이 놀자!":"");
+ const friendBubble=[...messages].reverse().find(m=>m.user_id!==ownUserId)?.body || (demo?"뭐 해?":"");
  const link=typeof window!=="undefined"&&roomId?window.location.origin+"?room="+roomId:"";
  const copy=async()=>{if(link)await navigator.clipboard.writeText(link);else if(!supabase)alert("실제 초대 링크는 Supabase 연결 후 만들 수 있어요.")};
  return (
@@ -221,15 +232,15 @@ export default function Home(){
            <Art kind={item.kind}/>
          </button>)}
          <div className="character-spot me">
-           <div className="speech-balloon" aria-live="polite">{ownBubble}</div>
+           {ownBubble&&<div className="speech-balloon" aria-live="polite">{ownBubble}</div>}
            <Avatar kind={chosenKind} mood={chosenMood}/>
            <span className="spot-label">나 · {characterNames[chosenKind]}</span>
          </div>
-         <div className="character-spot friend">
-           <div className="speech-balloon blue" aria-live="polite">{friendBubble}</div>
+         {(demo||other)?<div className="character-spot friend">
+           {friendBubble&&<div className="speech-balloon blue" aria-live="polite">{friendBubble}</div>}
            <Avatar kind={friendKind} mood={friendMood} friend/>
            <span className="spot-label">{other?.nickname||"친구"} · {characterNames[friendKind]}</span>
-         </div>
+         </div>:<div className="friend-placeholder">♡ 친구를 기다리는 중...</div>}
        </div>
        <div className="palette"><b>벽지</b>
          {([["pink","#fbe6e8"],["blue","#e1edf9"],["green","#e6efdf"],["cream","#fff1d5"]] as const).map(([w,c])=><button

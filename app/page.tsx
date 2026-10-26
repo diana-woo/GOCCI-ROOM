@@ -1,16 +1,112 @@
 "use client";
-import {useState} from "react";
+import {useCallback,useEffect,useRef,useState} from "react";
 import type {MouseEvent,FormEvent} from "react";
-type Item={id:number;icon:string;x:number;y:number};
+import {getSupabase} from "../lib/supabase";
+import {Art,Avatar,furnitureNames,type Furniture,type FurnitureKind} from "./room-art";
+type Wall="pink"|"blue"|"green"|"cream";
+type Chat={id:number;user_id:string;body:string};
+type Member={user_id:string;nickname:string};
+const starter:Furniture[]=[{id:"bed",kind:"bed",x:28,y:50},{id:"plant",kind:"plant",x:73,y:45}];
+const kinds=Object.keys(furnitureNames) as FurnitureKind[];
 export default function Home(){
- const [wall,setWall]=useState("#fbecee");
- const [items,setItems]=useState<Item[]>([{id:1,icon:"🛏️",x:25,y:45},{id:2,icon:"🪴",x:75,y:35},{id:3,icon:"🪑",x:56,y:63}]);
- const [chosen,setChosen]=useState<number|null>(null);
+ const supabase=getSupabase();
+ const [uid,setUid]=useState("");
+ const [roomId,setRoomId]=useState("");
+ const [nickname,setNickname]=useState("나");
+ const [wall,setWall]=useState<Wall>("pink");
+ const [furniture,setFurniture]=useState<Furniture[]>(starter);
+ const [selected,setSelected]=useState<string|null>(null);
+ const [members,setMembers]=useState<Member[]>([]);
+ const [messages,setMessages]=useState<Chat[]>([]);
  const [draft,setDraft]=useState("");
- const [messages,setMessages]=useState<string[]>(["친구: 안녕!"]);
- const add=(icon:string)=>setItems(a=>[...a,{id:Date.now(),icon,x:50,y:50}]);
- const place=(e:MouseEvent<HTMLDivElement>)=>{if(chosen===null)return;const r=e.currentTarget.getBoundingClientRect();setItems(a=>a.map(i=>i.id===chosen?{...i,x:Math.max(8,Math.min(92,100*(e.clientX-r.left)/r.width)),y:Math.max(12,Math.min(86,100*(e.clientY-r.top)/r.height))}:i));setChosen(null)};
- const send=(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();if(draft.trim())setMessages(a=>[...a,"나: "+draft.trim()]);setDraft("")};
- return <main className="wrap"><header><div><small>tiny place, big feelings</small><h1>GOCCI ROOM ♡</h1></div><button onClick={()=>navigator.clipboard?.writeText(location.href)}>초대 링크 복사 ↗</button></header><p className="desc">나만의 방을 꾸며요. 가구를 선택한 다음 원하는 위치를 눌러보세요.</p><div className="layout"><section className="card"><h2>⌂ 나의 작은 방</h2><div className="room" onClick={place} style={{background:wall}}><div className="back"/><div className="floor"/><div className="window">☁</div>{items.map(i=><button key={i.id} className={"item "+(chosen===i.id?"active":"")} style={{left:i.x+"%",top:i.y+"%"}} onClick={e=>{e.stopPropagation();setChosen(i.id)}} aria-label="가구 선택">{i.icon}</button>)}<div className="avatar a"><span>안녕!</span><div className="face">•ᴗ•</div><small>나</small></div><div className="avatar b"><span>헤헤</span><div className="face">•ᴗ•</div><small>친구</small></div></div><div className="tools"><b>벽지</b>{["#fbecee","#e9f2fd","#eef4e6","#fff4db"].map(c=><button key={c} aria-label="벽지 변경" className="color" style={{background:c}} onClick={()=>setWall(c)}/>)}<button onClick={()=>{setItems(a=>a.filter(i=>i.id!==chosen));setChosen(null)}} disabled={chosen===null}>선택 가구 삭제</button></div></section><aside><section className="card"><h2>✎ 꾸미기</h2><div className="choices">{[["🛋️","소파"],["🧸","인형"],["💡","조명"],["🌷","꽃"]].map(([icon,label])=><button key={label} onClick={()=>add(icon)}><span>{icon}</span><small>{label}</small></button>)}</div></section><section className="card"><h2>♡ 채팅 <small>로컬 데모</small></h2><div className="messages">{messages.map((m,i)=><p key={i}>{m}</p>)}</div><form onSubmit={send}><input value={draft} onChange={e=>setDraft(e.target.value)} placeholder="메시지를 입력하세요"/><button>보내기</button></form></section></aside></div><footer>첫 프로토타입 · 실시간 연결과 저장 기능은 아직 구현 전</footer><style jsx>{`
-.wrap{max-width:1100px;margin:auto;padding:30px 20px}header{display:flex;align-items:center;justify-content:space-between;gap:12px}header small{letter-spacing:2px;color:#888}h1{margin:3px 0;font-size:clamp(25px,4vw,40px);letter-spacing:-1px}h2{font-size:17px;margin:0 0 15px}h2 small{font-size:11px;color:#999}button{border:2px solid #292929;background:#fff;border-radius:15px;padding:10px 13px}.desc,footer{color:#888;font-size:13px}.layout{display:grid;grid-template-columns:1.6fr 1fr;gap:18px;margin-top:25px}.card{border:2px solid #292929;border-radius:22px;padding:18px;background:white;box-shadow:4px 5px 0 #e7e3df}aside{display:grid;gap:18px;align-content:start}.room{height:440px;position:relative;overflow:hidden;border:2px solid #292929;border-radius:16px;cursor:crosshair}.back{position:absolute;inset:12% 12% 38%;background:#fff9;clip-path:polygon(50% 0,100% 27%,100% 100%,50% 75%,0 100%,0 27%)}.floor{position:absolute;inset:39% 8% 9%;background:#e8d8bf;clip-path:polygon(50% 0,100% 29%,50% 100%,0 29%)}.window{position:absolute;top:22%;left:25%;background:#dceefa;border:3px solid #292929;border-radius:8px;padding:12px;transform:skewY(-10deg)}.item{position:absolute;transform:translate(-50%,-50%);font-size:45px;border:2px dashed transparent;background:transparent;padding:3px;z-index:2}.item.active{border-color:#e9799a;background:#fff8}.avatar{position:absolute;z-index:3;bottom:18%;left:30%;display:grid;justify-items:center;gap:4px}.avatar.b{left:65%;bottom:24%}.avatar span{border:2px solid #222;border-radius:18px;background:white;padding:4px 9px;font-size:12px}.face{border:3px solid #222;background:white;width:65px;height:60px;border-radius:48% 47% 43% 46%;display:grid;place-items:center;font-size:21px;box-shadow:inset 10px -4px #fae6e8}.avatar small{background:#fff9;border-radius:9px;padding:2px 7px}.tools{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:15px;font-size:12px}.tools .color{width:30px;height:30px;border-radius:50%;padding:0}.tools button:disabled{opacity:.4}.choices{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.choices button{display:grid;justify-items:center;gap:6px;padding:12px 3px;border-color:#ddd}.choices span{font-size:25px}.messages{height:160px;overflow:auto;background:#faf9f6;border-radius:12px;padding:8px 12px;font-size:13px}.messages p{background:#f9e7eb;border-radius:13px;padding:9px;width:fit-content}form{display:flex;gap:6px;margin-top:12px}form input{min-width:0;width:100%;border:1px solid #ddd;border-radius:12px;padding:9px}form button{background:#fbe5eb}footer{text-align:center;margin-top:25px}@media(max-width:720px){.layout{grid-template-columns:1fr}.room{height:360px}.wrap{padding:18px 12px}.card{padding:12px}.choices{grid-template-columns:repeat(4,1fr)}}`}</style></main>
+ const [error,setError]=useState("");
+ const [busy,setBusy]=useState(false);
+ const [ready,setReady]=useState(false);
+ const seq=useRef(0);
+ const demo=!supabase;
+ const refresh=useCallback(async(rid:string)=>{
+   if(!supabase)return;
+   const [room,people,chat]=await Promise.all([
+     supabase.from("rooms").select("wallpaper,furniture").eq("id",rid).single(),
+     supabase.from("room_members").select("user_id,nickname").eq("room_id",rid),
+     supabase.from("messages").select("id,user_id,body").eq("room_id",rid).order("id",{ascending:false}).limit(100)
+   ]);
+   if(room.data){setWall(room.data.wallpaper as Wall);setFurniture(room.data.furniture as Furniture[])}
+   if(people.data)setMembers(people.data);
+   if(chat.data)setMessages([...chat.data].reverse());
+ },[supabase]);
+ useEffect(()=>{
+   if(!supabase){setReady(true);return}
+   let live=true;
+   supabase.auth.getSession().then(async({data,error:sessionError})=>{
+     if(!live)return;
+     if(sessionError){setError(sessionError.message);setReady(true);return}
+     let user=sessionError?null:data.session?.user;
+     if(!user){const result=await supabase.auth.signInAnonymously();if(result.error){setError("익명 로그인을 활성화해 주세요: "+result.error.message);setReady(true);return}user=result.data.user}
+     if(!live||!user)return;
+     setUid(user.id);setReady(true);
+   });
+   return()=>{live=false};
+ },[supabase]);
+ useEffect(()=>{
+   if(!supabase||!uid||!roomId)return;
+   void refresh(roomId);
+   const channel=supabase.channel("gocci-"+roomId)
+     .on("postgres_changes",{event:"*",schema:"public",table:"rooms",filter:"id=eq."+roomId},()=>{void refresh(roomId)})
+     .on("postgres_changes",{event:"*",schema:"public",table:"room_members",filter:"room_id=eq."+roomId},()=>{void refresh(roomId)})
+     .on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:"room_id=eq."+roomId},()=>{void refresh(roomId)})
+     .subscribe();
+   return()=>{void supabase.removeChannel(channel)};
+ },[supabase,uid,roomId,refresh]);
+ useEffect(()=>{
+   if(!supabase||!uid)return;
+   const id=new URLSearchParams(window.location.search).get("room");
+   if(id && /^[0-9a-f-]{36}$/i.test(id)){void join(id)}
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ },[uid]);
+ async function join(id:string){
+   if(!supabase||!uid)return;
+   setBusy(true);setError("");
+   const {error:err}=await supabase.rpc("join_room",{p_room:id,p_nickname:nickname.trim()||"친구"});
+   if(err)setError(err.message);else{setRoomId(id);window.history.replaceState(null,"","?room="+id)}
+   setBusy(false);
+ }
+ async function createRoom(){
+   if(!supabase||!uid)return;
+   setBusy(true);setError("");
+   const {data,error:err}=await supabase.rpc("create_room",{p_nickname:nickname.trim()||"나"});
+   if(err)setError(err.message);else if(data){setRoomId(data as string);window.history.replaceState(null,"","?room="+data)}
+   setBusy(false);
+ }
+ async function persist(nextWall:Wall,nextFurniture:Furniture[]){
+   if(!supabase||!roomId)return;
+   if(members.length && members[0]?.user_id!==uid){setError("방 꾸미기는 방장만 변경할 수 있어요.");return}
+   const {error:err}=await supabase.from("rooms").update({wallpaper:nextWall,furniture:nextFurniture}).eq("id",roomId);
+   if(err){setError(err.message);await refresh(roomId)}
+ }
+ function wallpaper(w:Wall){setWall(w);void persist(w,furniture)}
+ function add(kind:FurnitureKind){const next=[...furniture,{id:"f-"+Date.now()+"-"+(++seq.current),kind,x:50,y:58}];setFurniture(next);void persist(wall,next)}
+ function remove(){const next=furniture.filter(i=>i.id!==selected);setFurniture(next);setSelected(null);void persist(wall,next)}
+ function place(e:MouseEvent<HTMLDivElement>){
+   if(!selected)return;
+   const r=e.currentTarget.getBoundingClientRect();
+   const x=Math.max(10,Math.min(90,(e.clientX-r.left)/r.width*100));
+   const y=Math.max(15,Math.min(85,(e.clientY-r.top)/r.height*100));
+   const next=furniture.map(i=>i.id===selected?{...i,x,y}:i);
+   setFurniture(next);setSelected(null);void persist(wall,next);
+ }
+ async function send(e:FormEvent<HTMLFormElement>){
+   e.preventDefault();const body=draft.trim().slice(0,500);if(!body)return;setDraft("");
+   if(!supabase||!roomId){setMessages(a=>[...a,{id:Date.now(),user_id:uid||"me",body}]);return}
+   const {error:err}=await supabase.from("messages").insert({room_id:roomId,user_id:uid,body});
+   if(err){setError(err.message);setDraft(body)}else await refresh(roomId);
+ }
+ const link=typeof window!=="undefined"&&roomId?window.location.origin+"?room="+roomId:"";
+ const copy=async()=>{if(link)await navigator.clipboard.writeText(link);else if(!supabase)alert("실제 초대 링크는 Supabase 연결 후 만들 수 있어요.")};
+ return <main className="shell"><header className="header"><div><div className="eyebrow">TINY PLACE, BIG FEELINGS</div><div className="brand">GOCCI ROOM ♡</div></div><button className="pill" onClick={copy} disabled={!roomId}>초대 링크 복사 ↗</button></header><p className="subtitle">우리 둘만의 작고 말랑한 공간. 가구를 고르고 방 안을 눌러 옮겨보세요.</p>
+ {error&&<div className="alert" role="alert">{error} <button onClick={()=>setError("")}>닫기</button></div>}
+ {demo?<div className="alert">미리보기 모드 · Supabase 환경변수를 연결하면 실제 2인 방과 실시간 채팅을 사용할 수 있어요.</div>:!roomId&&<div className="setup"><input className="nickname" maxLength={20} value={nickname} onChange={e=>setNickname(e.target.value)} aria-label="닉네임" placeholder="닉네임"/><button className="pill" disabled={!ready||busy||!uid} onClick={()=>void createRoom()}>새 방 만들기</button><span className="status">{!ready?"연결 중…":"방을 만들면 친구에게 링크를 보낼 수 있어요."}</span></div>}
+ {roomId&&<p className="status">함께 있는 사람 {members.length}/2 · {members.map(m=>m.nickname).join(" · ")} · 방장만 꾸미기를 변경할 수 있어요.</p>}
+ <div className="columns"><section className="panel"><h2>⌂ 우리의 작은 방</h2><div className={"room "+wall} onClick={place} aria-label="방 꾸미기 공간"><div className="floor"/><div className="window">☁</div>{furniture.map(i=><button key={i.id} aria-label={furnitureNames[i.kind]+" 위치 선택"} className={"object "+(selected===i.id?"selected":"")} style={{left:i.x+"%",top:i.y+"%"}} onClick={e=>{e.stopPropagation();setSelected(i.id)}}><Art kind={i.kind}/></button>)}<Avatar/><div className="name-tag" style={{left:"30%",top:"65%"}}>나</div><Avatar friend/><div className="name-tag" style={{left:"64%",top:"57%"}}>친구</div></div><div className="palette"><b>벽지</b>{([["pink","#fbe6e8"],["blue","#e1edf9"],["green","#e6efdf"],["cream","#fff1d5"]] as const).map(([w,c])=><button key={w} aria-label={w+" 벽지"} aria-pressed={wall===w} style={{background:c,outline:wall===w?"2px solid #e995ab":undefined}} onClick={()=>wallpaper(w)}/>)}<button className="tool" onClick={remove} disabled={!selected}>선택 가구 삭제</button></div></section>
+ <aside className="stack"><section className="panel"><h2>✎ 가구 꾸미기</h2><div className="furniture-grid">{kinds.map(kind=><button key={kind} className="furn-btn" onClick={()=>add(kind)}><Art kind={kind}/><span>{furnitureNames[kind]}</span></button>)}</div></section><section className="panel"><h2>♡ 채팅 {demo&&<small>(미리보기)</small>}</h2><div className="chat-log" aria-live="polite">{messages.length===0&&<p className="status">첫 인사를 건네보세요 ♡</p>}{messages.map(m=><p key={m.id} className={"chat-line "+(m.user_id!==uid?"friend":"")}>{m.user_id===uid?"나":members.find(p=>p.user_id===m.user_id)?.nickname||"친구"}: {m.body}</p>)}</div><form className="chat-form" onSubmit={send}><input value={draft} maxLength={500} onChange={e=>setDraft(e.target.value)} placeholder="메시지를 입력하세요" aria-label="메시지"/><button disabled={!!supabase&&!roomId}>보내기</button></form></section></aside></div><p className="footer">GOCCI ROOM · 둘만의 작은 세계</p></main>;
 }

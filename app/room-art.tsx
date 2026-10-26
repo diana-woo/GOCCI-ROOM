@@ -14,25 +14,23 @@ export function Art({kind}: {kind:FurnitureKind}){
  </svg>
 }
 export function Avatar({friend=false,style}: {friend?:boolean;style?:CSSProperties}){
- const ink="#4a3d38";
+ const ink="#211d1b";
  return <div className={"avatar "+(friend?"friend":"")} style={style} aria-label={friend?"하치와레":"치이카와"} role="img">
- <svg viewBox="0 0 140 145" aria-hidden="true">
-  <g stroke={ink} strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round">
-   {/* Short pear-shaped body and tiny limbs */}
-   <path d="M48 102Q38 104 34 119Q30 134 44 137Q55 138 59 128Q72 132 82 128Q88 139 100 136Q114 132 105 116Q101 106 92 102Z" fill="#fff"/>
-   <path d="M37 111Q22 104 19 116Q18 126 35 127M103 111Q119 104 122 116Q123 127 106 127" fill="#fff"/>
-   {friend?
-    <><path d="M23 53Q13 29 17 9Q18 3 24 8L52 30M88 29L117 7Q124 3 124 14Q124 38 115 56" fill="#a9d8ed"/><path d="M25 38L24 18 43 33M97 33L116 18 114 40" fill="#f9b7c5" strokeWidth="1.8"/></>:
-    <><path d="M23 54Q9 43 14 30Q18 16 31 17Q44 19 49 37M91 38Q97 19 109 17Q124 16 127 31Q129 43 115 54" fill="#fff"/><path d="M23 42Q18 35 23 29Q31 22 40 35M100 35Q109 22 117 29Q122 35 117 42" fill="#f9c4cd" strokeWidth="1.7"/></>}
-   <path d="M12 76Q11 43 40 34Q69 23 100 34Q128 42 128 77Q127 111 92 117Q69 122 44 117Q12 111 12 76Z" fill="#fff"/>
-   {friend&&<path d="M15 64Q16 42 41 35Q58 30 69 32Q83 28 101 35Q121 43 125 64Q110 62 100 54Q94 49 89 45Q85 62 72 67Q65 69 60 64Q50 56 49 45Q36 60 15 64Z" fill="#acd9ee" stroke="none"/>}
-   <ellipse cx="48" cy="81" rx="3.3" ry="4.3" fill={ink} stroke="none"/>
-   <ellipse cx="91" cy="81" rx="3.3" ry="4.3" fill={ink} stroke="none"/>
-   <ellipse cx="31" cy="91" rx="10.5" ry="5.3" fill="#f7b6c6" stroke="none" opacity=".8"/>
-   <ellipse cx="108" cy="91" rx="10.5" ry="5.3" fill="#f7b6c6" stroke="none" opacity=".8"/>
-   <path d="M66 88Q69 91 72 88" fill="none" strokeWidth="2"/>
-   <path d="M63 96Q69 101 76 96" fill="none" strokeWidth="2.1"/>
-   <path d="M52 114Q56 121 59 126M88 114Q84 121 82 126" fill="none" strokeWidth="2"/>
-  </g>
+ <svg viewBox="0 0 120 135" aria-hidden="true">
+ <g stroke={ink} strokeWidth="3.1" strokeLinecap="round" strokeLinejoin="round">
+ {/* Tiny feet and stubby arms */}
+ <path d="M35 98Q29 105 31 116Q33 123 43 121L51 114Q61 119 70 115L80 122Q91 125 93 115Q94 107 87 98" fill="#fff"/>
+ <path d="M28 92Q14 91 14 102Q14 109 29 108M92 92Q106 91 106 102Q106 109 91 108" fill="#fff"/>
+ {friend?<><path d="M20 52Q12 28 18 10Q20 5 26 11L45 31M76 31L96 10Q102 5 105 11Q112 29 101 52" fill="#fff"/><path d="m22 35 1-15 12 13m51 0 12-13 1 15" fill="#f6c6d0" strokeWidth="1.8"/></>:<><path d="M24 51Q9 43 15 29Q20 18 32 21Q43 24 45 38M75 38Q79 24 91 21Q103 18 108 29Q114 43 99 51" fill="#fff"/><path d="M23 40Q17 33 23 28Q31 23 37 35M83 35Q89 23 97 28Q103 33 97 40" fill="#f9cbd3" strokeWidth="1.8"/></>}
+ {/* Main head, near-round and slightly squashed, like the provided reference */}
+ <path d="M9 70Q9 41 32 34Q58 25 83 33Q110 39 111 69Q113 96 93 106Q76 115 58 113Q35 115 20 103Q8 92 9 70Z" fill="#fff"/>
+ {friend&&<path d="M12 59Q17 39 37 34Q51 29 60 32Q74 28 87 35Q104 40 108 59Q92 57 84 46Q81 42 79 42Q74 57 61 59Q49 57 41 43Q30 56 12 59Z" fill="#a6d8ef" stroke="none"/>}
+ <ellipse cx="43" cy="74" rx="2.9" ry="3.5" fill={ink} stroke="none"/>
+ <ellipse cx="78" cy="74" rx="2.9" ry="3.5" fill={ink} stroke="none"/>
+ <ellipse cx="28" cy="84" rx="8.2" ry="5.3" fill="#f4a4b7" stroke="none" opacity=".85"/>
+ <ellipse cx="93" cy="84" rx="8.2" ry="5.3" fill="#f4a4b7" stroke="none" opacity=".85"/>
+ <path d="M57 81Q60 84 63 81" fill="none" strokeWidth="2.2"/>
+ <path d="M54 87Q60 95 66 87" fill="none" strokeWidth="2.2"/>
+ </g>
  </svg></div>
 }

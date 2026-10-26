@@ -1,6 +1,6 @@
 {
   "name": "gocci-room",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,7 +10,8 @@
   "dependencies": {
     "next": "^15.5.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "@supabase/supabase-js": "^2.58.0"
   },
   "devDependencies": {
     "typescript": "^5.9.0",
